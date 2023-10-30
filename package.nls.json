@@ -1,0 +1,19 @@
+{
+    "image-preview-view.description":"Preview multiple pictures at once",
+    "image-preview-view.refresh": "Refresh",
+    "image-preview-view.delete_all": "Delete All",
+    "image-preview-view.view_title": "Image Preview",
+    "image-preview-view.change_to_dark_theme": "Change to dark theme",
+    "image-preview-view.change_to_light_theme": "Change to light theme",
+    "image-preview-view.change_to_default_theme": "Change to default theme",
+    "image-preview-view.copy_iamge_name": "Copy image name",
+    "image-preview-view.location_iamge": "Location item",
+    "image-preview-view.explorer_iamge": "Explorer item",
+    "image-preview-view.del_iamge": "Delete",
+    "image-preview-view.image_suffix": "image suffix",
+    "image-preview-view.yes": "Yes",
+    "image-preview-view.no": "No",
+    "image-preview-view.delete_confirmation": "Delete confirmation",
+    "image-preview-view.is_delete_file": "Whether to delete({0})?",
+    "image-preview-view.failed_to_delete_file": "Failed to delete file!"
+}

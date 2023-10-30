@@ -1,0 +1,4 @@
+  // "galleryBanner": {
+  //   "color": "#FF0000",
+  //   "theme": "dark"
+  // },
