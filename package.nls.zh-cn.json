@@ -1,5 +1,5 @@
 {
-    "image-preview-view.description":"一次预览多张图片",
+    "image-preview-view.description": "一次预览多张图片",
     "image-preview-view.refresh": "刷新",
     "image-preview-view.delete_all": "删除全部",
     "image-preview-view.view_title": "图片预览",
@@ -7,6 +7,7 @@
     "image-preview-view.change_to_light_theme": "切换到浅色主题",
     "image-preview-view.change_to_default_theme": "切换到默认主题",
     "image-preview-view.copy_iamge_name": "复制图片名称",
+    "image-preview-view.copy_image_relative_path": "复制相对路径",
     "image-preview-view.location_iamge": "定位选项",
     "image-preview-view.explorer_iamge": "在文件资源管理器中显示",
     "image-preview-view.del_iamge": "删除图片",
@@ -14,5 +15,7 @@
     "image-preview-view.yes": "是",
     "image-preview-view.no": "否",
     "image-preview-view.delete_confirmation": "删除确认",
-    "image-preview-view.is_delete_file": "是否删除({0})?"
+    "image-preview-view.is_delete_file": "是否删除({0})?",
+    
+    "image-preview-view.is_resident_memory": "在切换到其他界面时，是否保留当前界面？  该功能需要重启图片预览视图，会具有较高的内存开销。"
 }

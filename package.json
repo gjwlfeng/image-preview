@@ -2,11 +2,10 @@
   "name": "image-preview-view",
   "displayName": "Image Preview View",
   "description": "Preview multiple images at once",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "ZengFeng",
   "license": "SEE LICENSE IN LICENSE.txt",
   "icon": "images/icon.png",
-
   "pricing": "Free",
   "bugs": {
     "url": "https://github.com/gjwlfeng/image-preview/issues",
@@ -32,6 +31,11 @@
         "command": "image-preview-view.copyImageName",
         "category": "image-preview-view",
         "title": "%image-preview-view.copy_iamge_name%"
+      },
+      {
+        "command": "image-preview-view.copyImageRelativePath",
+        "category": "image-preview-view",
+        "title": "%image-preview-view.copy_image_relative_path%"
       },
       {
         "command": "image-preview-view.openExplorer",
@@ -95,6 +99,12 @@
           "group": "1_edit@1"
         },
         {
+          "command": "image-preview-view.copyImageRelativePath",
+          "when": "webviewId == 'image-preview-view.ImagePreviewView' && webviewSection == 'imgItem'",
+          "group": "1_edit@2"
+        },
+        
+        {
           "command": "image-preview-view.openExplorer",
           "when": "webviewId == 'image-preview-view.ImagePreviewView' && webviewSection == 'imgItem'",
           "group": "2_view@2"
@@ -124,10 +134,11 @@
           "when": "webviewId == 'image-preview-view.ImagePreviewView' && webviewSection == 'imgItem'",
           "group": "4_del@1"
         }
+        
       ]
     },
     "configuration": {
-      "title": "Image Preview",
+      "title": "Image Preview View",
       "properties": {
         "image-preview-view.imageSuffix": {
           "type": "array",
@@ -143,6 +154,11 @@
             ".svg"
           ],
           "description": "%image-preview-view.image_suffix%"
+        },
+        "image-preview-view.isResidentMemory": {
+          "type": "boolean",
+          "default": false,
+          "description": "%image-preview-view.is_resident_memory%"
         }
       }
     }

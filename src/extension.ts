@@ -204,20 +204,49 @@ export function activate(context: vscode.ExtensionContext) {
 		// Display a message box to the user
 		myLog().info(`image-preview-view--------------------`);
 		myLog().info(args);
+
 		vscode.env.clipboard.writeText(path.parse(args.imagePath).name);
 	});
 
+	let copyImageRelativePathDisposable = vscode.commands.registerCommand('image-preview-view.copyImageRelativePath', async (args) => {
+		// The code you place here will be executed every time your command is executed
+		// Display a message box to the user
+		myLog().info(`image-preview-view--------------------`);
+		myLog().info(args);
+
+		let workspaceDir: string[] = [];
+		(vscode.workspace.workspaceFolders || []).forEach((value) => {
+			let curWorkspaceFolder = value.uri.fsPath;
+			myLog().info(args.imagePath);
+			myLog().info(value.uri.fsPath);
+			let result = args.imagePath.startsWith(value.uri.fsPath);
+			if (result) {
+				workspaceDir.push(curWorkspaceFolder)
+			}
+		});
+
+		workspaceDir.sort((item1, item2) => {
+			return item1.length - item2.length;
+		});
+
+		if (workspaceDir.length == 0) {
+			vscode.env.clipboard.writeText(args.imagePath);
+		} else {
+			let relativePath = args.imagePath.replace(workspaceDir[workspaceDir.length - 1], "").replace("\\", "");
+			vscode.env.clipboard.writeText(JSON.stringify(relativePath));
+		}
+	});
 
 	let delImageDisposable = vscode.commands.registerCommand('image-preview-view.delImage', async (args) => {
 
 		console.log(`delImage=${args.imagePath}`);
 		const yesText = localize('image-preview-view.yes');
-			const noText = localize('image-preview-view.no');
+		const noText = localize('image-preview-view.no');
 		const deleteConfirmationText = localize('image-preview-view.delete_confirmation');
 		const isDeleteFileText = localize('image-preview-view.is_delete_file', path.basename(args.imagePath));
 		const failedToDeleteFileText = vscode.l10n.t('image-preview-view.failed_to_delete_file');
 
-		let selectList = [{ id: 1, label:yesText }, { id: 2, label:noText}];
+		let selectList = [{ id: 1, label: yesText }, { id: 2, label: noText }];
 		vscode.window.showQuickPick<any>(selectList, {
 			title: deleteConfirmationText,
 			placeHolder: isDeleteFileText,
@@ -236,7 +265,6 @@ export function activate(context: vscode.ExtensionContext) {
 				});
 			}
 		});
-
 
 	});
 
@@ -290,17 +318,19 @@ export function activate(context: vscode.ExtensionContext) {
 
 	});
 
-	
 
-	context.subscriptions.push(addImageDirDisposable);
-	context.subscriptions.push(copyImageNameDisposable);
-	context.subscriptions.push(localItemDisposable);
-	context.subscriptions.push(openExplorerDisposable);
-	context.subscriptions.push(changeToImageDefalutThemeDisposable);
-	context.subscriptions.push(changeToImageLightThemeDisposable);
-	context.subscriptions.push(changeToImageDartThemeDisposable);
-	context.subscriptions.push(delImageDisposable);
-	context.subscriptions.push(refreshDisposable);
+	context.subscriptions.push(
+		refreshDisposable,
+		delImageDisposable,
+		copyImageRelativePathDisposable,
+		addImageDirDisposable,
+		copyImageNameDisposable,
+		localItemDisposable,
+
+		openExplorerDisposable,
+		changeToImageDefalutThemeDisposable,
+		changeToImageLightThemeDisposable,
+		changeToImageDartThemeDisposable)
 }
 
 /**
@@ -340,9 +370,10 @@ class EditViewImagePreviewViewProvider {
 	public static readonly viewType = 'image-preview-view.ImagePreviewView';
 
 	private _view?: vscode.WebviewPanel;
-	private _context: vscode.ExtensionContext;
-	private _onDidDispose: () => void;
-	private _onDidReceiveMessage: (data: any) => any;
+	private _context?: vscode.ExtensionContext;
+	private _onDidDispose?: () => void;
+	private _onDidReceiveMessage?: (data: any) => any;
+	private _disposables: vscode.Disposable[] = [];
 
 	constructor(
 		context: vscode.ExtensionContext,
@@ -375,11 +406,15 @@ class EditViewImagePreviewViewProvider {
 		if (view !== undefined) {
 			this._view = view!!;
 		} else {
+			const isResidentMemory = vscode.workspace.getConfiguration().get<boolean>("image-preview-view.is_resident_memory") || false;
 			this._view = vscode.window.createWebviewPanel(
 				EditViewImagePreviewViewProvider.viewType,
-				'Image Preview',
+				'Image Preview View',
 				vscode.ViewColumn.One,
-				{ enableScripts: true, }
+				{
+					enableScripts: true,
+					retainContextWhenHidden: isResidentMemory
+				}
 			);
 		}
 
@@ -392,16 +427,22 @@ class EditViewImagePreviewViewProvider {
 
 		this._view.webview.onDidReceiveMessage(data => {
 			myLog().info(data);
-			this._onDidReceiveMessage.call(this, data);
+			this._onDidReceiveMessage!.call(this, data);
 		});
 
 		this._view.onDidDispose(
 			() => {
+				this._onDidDispose?.call(this);
+				this._disposables.forEach((item) => {
+					item.dispose();
+				});
 				this._view = undefined;
-				this._onDidDispose();
+				this._context = undefined;
+				this._onDidReceiveMessage = undefined;
+				this._onDidDispose = undefined;
 			},
 			null,
-			this._context.subscriptions
+			this._disposables
 		);
 
 	}
@@ -505,9 +546,9 @@ class EditViewImagePreviewViewProvider {
 	private getHtmlForWebview() {
 
 		const jsFilePath =
-			vscode.Uri.joinPath(this._context.extensionUri, 'template', 'index-9d718c3e.js');
+			vscode.Uri.joinPath(this._context!.extensionUri, 'template', 'index-9d718c3e.js');
 		const cssFilePath =
-			vscode.Uri.joinPath(this._context.extensionUri, 'template', 'index-8c1ff1a5.css');
+			vscode.Uri.joinPath(this._context!.extensionUri, 'template', 'index-8c1ff1a5.css');
 
 
 		let jsUrl = this._view!!.webview.asWebviewUri(jsFilePath).toString();
@@ -522,7 +563,7 @@ class EditViewImagePreviewViewProvider {
 			<link rel="icon" href="/favicon.ico">
 			
 			<meta name="viewport" content="width=device-width, initial-scale=1.0">
-			<title>Image Preview</title>
+			<title>Image Preview View</title>
 			
 			<script type="module" crossorigin src="${jsUrl}"></script>
 			
@@ -581,7 +622,7 @@ class ImageThemeStorage {
 		}
 
 		let curTheme = themeList.find((theme) => {
-			return theme.imagePath == imagePath;
+			return theme.imagePath === imagePath;
 		});
 
 		if (curTheme === undefined) {
